@@ -1,9 +1,9 @@
-"""Contract-first placeholders. Replace bodies only; keep the wire contract stable."""
+"""Frozen route declarations with tenant-scoped implementations."""
 
-from typing import Annotated, NoReturn
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Header, Query, Response, Security
+from fastapi import APIRouter, Header, Query, Request, Response, Security
 from fastapi.security import APIKeyCookie
 
 from app.contracts import (
@@ -13,31 +13,36 @@ from app.contracts import (
     CertificateListQuery,
     CertificatePage,
     CourseList,
-    ErrorCode,
     ErrorResponse,
     Identity,
     LoginRequest,
 )
-from app.errors import ApiError
+from app.database import transaction
+from app.services import auth, certificates
 
 session_cookie = APIKeyCookie(name="certificate_admin_session", auto_error=False)
 errors = {status: {"model": ErrorResponse} for status in (401, 403, 404, 409, 422, 500, 501, 503)}
 router = APIRouter(prefix="/api", responses=errors)
-authenticated = [Security(session_cookie)]  # OpenAPI declaration only; no auth implemented yet.
-
-
-def not_implemented() -> NoReturn:
-    raise ApiError(501, ErrorCode.NOT_IMPLEMENTED, "Business functionality is not implemented yet.")
+authenticated = [Security(session_cookie)]
 
 
 @router.post("/auth/login", response_model=Identity, operation_id="login", tags=["auth"])
-def login(body: LoginRequest) -> Identity:
-    not_implemented()
+def login(body: LoginRequest, request: Request, response: Response) -> Identity:
+    return auth.login(request, body, response)
 
 
 @router.post("/auth/logout", status_code=204, operation_id="logout", tags=["auth"])
-def logout() -> Response:
-    not_implemented()
+def logout(request: Request) -> Response:
+    request.app.state.sessions.remove(request.cookies.get(auth.COOKIE))
+    response = Response(status_code=204)
+    response.delete_cookie(
+        auth.COOKIE,
+        path="/",
+        httponly=True,
+        samesite="lax",
+        secure=request.app.state.cookie_secure or request.url.scheme == "https",
+    )
+    return response
 
 
 @router.get(
@@ -47,8 +52,8 @@ def logout() -> Response:
     dependencies=authenticated,
     tags=["auth"],
 )
-def get_identity() -> Identity:
-    not_implemented()
+def get_identity(request: Request) -> Identity:
+    return auth.current(request)
 
 
 @router.get(
@@ -58,8 +63,9 @@ def get_identity() -> Identity:
     dependencies=authenticated,
     tags=["courses"],
 )
-def list_courses() -> CourseList:
-    not_implemented()
+def list_courses(request: Request) -> CourseList:
+    identity = auth.current(request)
+    return certificates.list_courses(request.app.state.engine, identity["tenant"]["id"])
 
 
 @router.get(
@@ -69,8 +75,11 @@ def list_courses() -> CourseList:
     dependencies=authenticated,
     tags=["certificates"],
 )
-def list_certificates(query: Annotated[CertificateListQuery, Query()]) -> CertificatePage:
-    not_implemented()
+def list_certificates(
+    query: Annotated[CertificateListQuery, Query()], request: Request
+) -> CertificatePage:
+    identity = auth.current(request)
+    return certificates.list_certificates(request.app.state.engine, identity["tenant"]["id"], query)
 
 
 @router.get(
@@ -90,8 +99,10 @@ def list_certificates(query: Annotated[CertificateListQuery, Query()]) -> Certif
         }
     },
 )
-def export_certificates(query: Annotated[CertificateFilters, Query()]) -> Response:
-    not_implemented()
+def export_certificates(
+    query: Annotated[CertificateFilters, Query()], request: Request
+) -> Response:
+    return certificates.export(request.app.state.engine, auth.current(request), query)
 
 
 @router.get(
@@ -101,8 +112,10 @@ def export_certificates(query: Annotated[CertificateFilters, Query()]) -> Respon
     dependencies=authenticated,
     tags=["certificates"],
 )
-def get_certificate(id: UUID) -> CertificateDetail:
-    not_implemented()
+def get_certificate(id: UUID, request: Request) -> CertificateDetail:
+    identity = auth.current(request)
+    with transaction(request.app.state.engine) as connection:
+        return certificates.detail(connection, identity["tenant"]["id"], id)
 
 
 @router.post(
@@ -112,8 +125,8 @@ def get_certificate(id: UUID) -> CertificateDetail:
     dependencies=authenticated,
     tags=["certificates"],
 )
-def revoke_certificate(id: UUID) -> CertificateDetail:
-    not_implemented()
+def revoke_certificate(id: UUID, request: Request) -> CertificateDetail:
+    return certificates.revoke(request.app.state.engine, auth.current(request), id)
 
 
 @router.post(
@@ -124,6 +137,6 @@ def revoke_certificate(id: UUID) -> CertificateDetail:
     tags=["courses"],
 )
 def issue_certificates(
-    id: UUID, idempotency_key: Annotated[UUID, Header(alias="Idempotency-Key")]
+    id: UUID, idempotency_key: Annotated[UUID, Header(alias="Idempotency-Key")], request: Request
 ) -> BulkIssueResult:
-    not_implemented()
+    return certificates.issue(request.app.state.engine, auth.current(request), id, idempotency_key)

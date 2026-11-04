@@ -42,8 +42,8 @@ def test_wire_timestamp_rejects_naive_datetime():
         CertificateDetail.model_validate(example)
 
 
-def test_health():
-    with TestClient(create_app()) as client:
+def test_health(tmp_path):
+    with TestClient(create_app(f"sqlite:///{(tmp_path / 'health.db').as_posix()}")) as client:
         response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "service": "certificate-admin-api"}

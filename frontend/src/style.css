@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  color: #303133;
+  background: #f5f7fa;
+  font-family: system-ui, sans-serif;
+}
+
+.scaffold {
+  max-width: 880px;
+  margin: 64px auto;
+  padding: 24px;
+}

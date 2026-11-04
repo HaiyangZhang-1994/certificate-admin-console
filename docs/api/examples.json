@@ -1,0 +1,68 @@
+{
+  "identity": {
+    "admin": {"id": "10000000-0000-4000-8000-000000000001", "username": "sydney.admin", "name": "Sydney Admin"},
+    "tenant": {"id": "20000000-0000-4000-8000-000000000001", "name": "Sydney Training", "timezone": "Australia/Sydney"}
+  },
+  "perth_identity": {
+    "admin": {"id": "10000000-0000-4000-8000-000000000002", "username": "perth.admin", "name": "Perth Admin"},
+    "tenant": {"id": "20000000-0000-4000-8000-000000000002", "name": "Perth Training", "timezone": "Australia/Perth"}
+  },
+  "courses": {
+    "items": [{
+      "id": "30000000-0000-4000-8000-000000000001", "title": "Workplace Safety",
+      "ends_at": "2026-10-01T00:00:00Z", "is_finished": true,
+      "enrollment_count": 3, "completed_count": 2, "eligible_count": 1, "already_issued_count": 1
+    }]
+  },
+  "certificate_page": {
+    "items": [{
+      "id": "50000000-0000-4000-8000-000000000001",
+      "learner": {"id": "40000000-0000-4000-8000-000000000001", "name": "Alex Chen", "email": "alex@example.test"},
+      "course": {"id": "30000000-0000-4000-8000-000000000001", "title": "Workplace Safety"},
+      "serial_number": "CERT-50000000-0000-4000-8000-000000000001",
+      "issued_at": "2026-10-20T23:30:00Z", "status": "valid"
+    }],
+    "total": 1, "page": 1, "page_size": 20
+  },
+  "certificate_detail": {
+    "id": "50000000-0000-4000-8000-000000000001",
+    "learner": {"id": "40000000-0000-4000-8000-000000000001", "name": "Alex Chen", "email": "alex@example.test"},
+    "course": {"id": "30000000-0000-4000-8000-000000000001", "title": "Workplace Safety"},
+    "serial_number": "CERT-50000000-0000-4000-8000-000000000001",
+    "issued_at": "2026-10-20T23:30:00Z", "status": "valid",
+    "issued_by": {"id": "10000000-0000-4000-8000-000000000001", "username": "sydney.admin", "name": "Sydney Admin"},
+    "revoked_at": null, "revoked_by": null
+  },
+  "revoked_certificate_detail": {
+    "id": "50000000-0000-4000-8000-000000000001",
+    "learner": {"id": "40000000-0000-4000-8000-000000000001", "name": "Alex Chen", "email": "alex@example.test"},
+    "course": {"id": "30000000-0000-4000-8000-000000000001", "title": "Workplace Safety"},
+    "serial_number": "CERT-50000000-0000-4000-8000-000000000001",
+    "issued_at": "2026-10-20T23:30:00Z", "status": "revoked",
+    "issued_by": {"id": "10000000-0000-4000-8000-000000000001", "username": "sydney.admin", "name": "Sydney Admin"},
+    "revoked_at": "2026-10-21T01:00:00Z",
+    "revoked_by": {"id": "10000000-0000-4000-8000-000000000001", "username": "sydney.admin", "name": "Sydney Admin"}
+  },
+  "bulk_issue_result": {
+    "issued_count": 1, "skipped_count": 1, "failed_count": 1,
+    "results": [
+      {
+        "enrollment_id": "60000000-0000-4000-8000-000000000001",
+        "learner_id": "40000000-0000-4000-8000-000000000001", "learner_name": "Alex Chen",
+        "outcome": "issued", "reason": null,
+        "certificate_id": "50000000-0000-4000-8000-000000000001", "serial_number": "CERT-50000000-0000-4000-8000-000000000001"
+      },
+      {
+        "enrollment_id": "60000000-0000-4000-8000-000000000002",
+        "learner_id": "40000000-0000-4000-8000-000000000002", "learner_name": "Taylor Lee",
+        "outcome": "skipped", "reason": "not_completed", "certificate_id": null, "serial_number": null
+      },
+      {
+        "enrollment_id": "60000000-0000-4000-8000-000000000003",
+        "learner_id": "40000000-0000-4000-8000-000000000003", "learner_name": "Sam Wu",
+        "outcome": "failed", "reason": "invalid_enrollment", "certificate_id": null, "serial_number": null
+      }
+    ]
+  },
+  "error": {"error": {"code": "database_busy", "message": "Please retry with the same idempotency key."}}
+}

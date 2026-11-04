@@ -1,6 +1,6 @@
 # API Contract v1
 
-状态：已冻结供 Backend / Frontend 并行开发。业务接口当前为 501 占位，不是已实现的服务。
+状态：契约冻结；Backend / Frontend 已实现并集成，真实联调及契约一致性检查通过。
 
 ## 1. 唯一契约和生成链
 
@@ -26,7 +26,7 @@ OpenAPI 是双方联调时的机器可读基线；声明是生成来源。本文
 - 登录成功设置会话 cookie，退出删除；Frontend 始终 credentials=include。
 - 登录和退出不要求有效旧身份；退出幂等。其余业务 API 要求已登录。
 - 所有 POST 校验 Origin 白名单，默认 `http://127.0.0.1:5173`；拒绝缺失、null 和不允许的 Origin。脚本/测试需要显式带正确 Origin。
-- 当前骨架只声明 cookie security，尚未实现认证或 Origin 校验；这由 Backend Ticket 完成。
+- 后端已实现 cookie 认证与 Origin 校验；OpenAPI security 声明保持不变。
 - 前端不得根据 body.error 的有无猜测成功，先检查 HTTP 状态；网络异常没有可靠业务结果。
 
 ```json

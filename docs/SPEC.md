@@ -1,6 +1,6 @@
 # Certificate Admin Console — MVP Spec
 
-状态：方案已确认；项目骨架和共享契约已建立，业务功能待 Backend / Frontend Ticket 实现。
+状态：Backend / Frontend Ticket 已集成至 feature/mvp；已完成真实浏览器业务链路验证，范围与限制见 README。
 
 接口字段、HTTP 状态和枚举以 [API Contract](API_CONTRACT.md) 及生成的 [OpenAPI](api/openapi.json) 为准。并行开发分别遵循 [Backend Ticket](tickets/BACKEND.md) 和 [Frontend Ticket](tickets/FRONTEND.md)。
 

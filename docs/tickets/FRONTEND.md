@@ -1,6 +1,6 @@
 # FE-01 — Frontend MVP
 
-状态：Ready，尚未开始。建议分支：feature/frontend；基于 feature/mvp 的基础提交。
+状态：Completed；实现提交 bb7d9d8，已与 Backend 集成至 feature/mvp。原完成记录中的 mock 验证为独立开发阶段，后续真实联调记录见 README。
 
 ## 目标
 

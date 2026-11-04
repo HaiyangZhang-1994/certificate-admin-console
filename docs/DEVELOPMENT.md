@@ -5,7 +5,7 @@
 ```text
 backend/
   app/contracts.py       共享 DTO 声明（冻结）
-  app/routes.py          固定 API 路由，当前 501 占位
+  app/routes.py          固定 API 路由及真实业务实现
   app/errors.py          统一错误 envelope
   app/models/            Backend 数据库模型
   app/services/          Backend 业务逻辑
@@ -16,7 +16,7 @@ backend/
 frontend/
   src/api/client.ts      基于 paths 的 typed client
   src/api/contract-examples.ts  共享样例入口，不自动启用 mock
-  src/App.vue            当前仅为骨架页
+  src/App.vue            证书控制台
 packages/api-contract/   生成类型和公共类型别名
 docs/api/               OpenAPI 和共享样例
 docs/tickets/           两个并行任务
@@ -41,9 +41,9 @@ Python 依赖统一由 backend/requirements.txt 安装；requirements.in 是直�
 | npm run contract:generate | 协调后重建 OpenAPI 与 TS |
 | npm run check | 全部基础检查 |
 
-使用 127.0.0.1，不混用 localhost，以免 cookie 和 Origin 不一致。正式联调默认端口不变；本地另起实例时可用独立命令传端口、设置 API_PROXY_TARGET 和 ALLOWED_ORIGINS，同时保持浏览器同源代理。Root dev 脚本固定默认端口，不要同时运行两个默认全栈实例。
+使用 127.0.0.1，不混用 localhost，以免 cookie 和 Origin 不一致。Root dev 默认 5173/8000；可设置 FRONTEND_PORT / BACKEND_PORT 自动匹配代理及 Origin。显式 API_PROXY_TARGET / ALLOWED_ORIGINS 优先。不要同时运行两个默认全栈实例。
 
-骨架尚无数据库初始化、reset 命令和可用演示账号。Backend 交付时补齐命令和说明；当前返回 501 是预期，不能误判成登录失败。
+启动自动建表；`npm run seed` 幂等填充演示数据，`npm run reset` 显式清空配置数据库并重新 seed（先停止服务）。演示账号和真实联调记录见 README。业务接口已实现，501 不再是预期结果。
 
 ## 3. 两个 Worktree 的边界
 

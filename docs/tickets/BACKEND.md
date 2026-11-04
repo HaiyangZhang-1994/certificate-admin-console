@@ -1,6 +1,6 @@
 # BE-01 — Backend MVP
 
-状态：Completed。实现分支：codex/backend-mvp；基于共享骨架提交 180fca6，尚未合并。
+状态：Completed。实现分支：codex/backend-mvp；基于共享骨架提交 180fca6，已合入 feature/mvp；真实前后端联调记录见 README。下方交付记录保留独立开发时的验证范围。
 
 ## 目标
 

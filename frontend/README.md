@@ -25,6 +25,8 @@ To return to real mode, stop Vite, run `Remove-Item Env:VITE_API_MODE -ErrorActi
 
 ## Checks
 
+真实 Backend 联调：先按根 README 启动/seed，再执行 `npm run test:integration --workspace @certificate-admin/frontend`。支持与下方 mock 测试相同的 PLAYWRIGHT_MODULE、PLAYWRIGHT_EXECUTABLE、FRONTEND_URL 和 SCREENSHOT_DIR。真实测试会签发及撤销本地演示证书，不 reset 数据库；覆盖范围与未验证项见根 README。
+
 ```powershell
 npm run test --workspace @certificate-admin/frontend
 npm run typecheck

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import BulkIssue from './components/BulkIssue.vue'
 import { useConsole } from './useConsole'
@@ -13,6 +13,11 @@ const credentials = reactive({ username: '', password: '' })
 const revokeBusy = ref(false)
 const revokeError = ref('')
 const bulk = ref<InstanceType<typeof BulkIssue> | null>(null)
+watch(sessionVersion, () => {
+  ElMessage.closeAll()
+  ElMessageBox.close()
+  revokeError.value = ''
+}, { flush: 'sync' })
 const mock = import.meta.env.DEV && import.meta.env.VITE_API_MODE === 'mock'
 const scenario = ref('normal')
 const date = (value: string) => formatDate(value, identity.value?.tenant.timezone ?? 'UTC')

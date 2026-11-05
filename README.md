@@ -99,6 +99,12 @@ Windows、Node 24.15、Python 3.12.14、已有 Playwright/Chromium。Browser 插
 - Element Plus 全量导入有大 chunk 构建提示；Starlette TestClient/httpx 有弃用提示，均不阻断检查。
 - Section 8 独立反思/设计回答及录屏由候选人自行完成。
 
+## 提交前复核（2026-11-04）
+
+`main` 已保留原始提交及两个 merge commit，包含 Backend、Frontend、集成联调和 `f71d163` 的三项 Review 修复。重新安装锁定依赖后，`npm run check`（72 后端 + 5 前端测试、契约、Ruff、类型及构建）通过；独立临时数据库上的真实浏览器联调及 Review 回归通过。演示数据仍由 seed 提供，数据库文件不提交。
+
+AI 需求讨论、两个 Worktree 开发、集成及 Review 的脱敏记录见 [ai-interactions](ai-interactions/README.md)，提交前验证范围见 [Release Checks](ai-interactions/RELEASE_CHECKS.md)。录屏链接及 Section 8 独立回答仍由候选人自行提供。
+
 ## 文档
 
 [Spec](docs/SPEC.md) · [API Contract](docs/API_CONTRACT.md) · [OpenAPI](docs/api/openapi.json) · [Backend Ticket](docs/tickets/BACKEND.md) · [Frontend Ticket](docs/tickets/FRONTEND.md) · [开发说明](docs/DEVELOPMENT.md) · [开发计划](docs/DEVELOPMENT_PLAN.md)

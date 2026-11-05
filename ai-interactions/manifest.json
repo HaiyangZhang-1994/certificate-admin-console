@@ -1,0 +1,62 @@
+{
+  "format_version": 1,
+  "sessions": [
+    {
+      "file": "01-requirements-and-scaffold.md",
+      "session_id": "01a1a8c0-8f01-71e2-9328-c161ac525ca8",
+      "title": "分析 Take-home 技术方案",
+      "messages": 17,
+      "tool_events": 80,
+      "last_event_utc": "2026-11-04T23:12:07.292Z"
+    },
+    {
+      "file": "02-backend-worktree.md",
+      "session_id": "01a1a8d8-1680-7c20-af9c-3bfd09148e81",
+      "title": "实现证书管理后端",
+      "messages": 7,
+      "tool_events": 56,
+      "last_event_utc": "2026-11-04T23:27:17.668Z"
+    },
+    {
+      "file": "03-frontend-worktree.md",
+      "session_id": "01a1a8d8-d805-79d0-837d-4ab8c16b0291",
+      "title": "实现证书管理前端界面",
+      "messages": 12,
+      "tool_events": 142,
+      "last_event_utc": "2026-11-04T23:39:28.399Z"
+    },
+    {
+      "file": "04-integration-testing.md",
+      "session_id": "01a1a8ef-55c8-7db1-b21b-2deb07534f1f",
+      "title": "合并并验证 MVP 前后端",
+      "messages": 10,
+      "tool_events": 78,
+      "last_event_utc": "2026-11-04T23:53:52.678Z"
+    },
+    {
+      "file": "05-code-review-and-fixes.md",
+      "session_id": "01a1a8fd-bb7e-7642-a000-cbd67a606d3f",
+      "title": "审查 main 与 feature/mvp",
+      "messages": 20,
+      "tool_events": 102,
+      "last_event_utc": "2026-11-05T00:23:16.934Z"
+    },
+    {
+      "file": "06-release-preparation.md",
+      "session_id": "01a1a91b-56f8-74b2-9c3e-1b42c5ad9b43",
+      "title": "Publish certificate-admin-console",
+      "messages": 5,
+      "tool_events": 47,
+      "last_event_utc": "2026-11-05T00:35:58.551Z"
+    }
+  ],
+  "external_chats": [
+    {
+      "file": "00-assessment-discussion.md",
+      "session_id": "6aea94e5-f890-83e8-b7e1-51397f250e03",
+      "title": "查看面试考核内容",
+      "messages": 4,
+      "complete": true
+    }
+  ]
+}

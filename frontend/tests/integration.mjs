@@ -38,6 +38,7 @@ async function login(username) {
   await page.locator('.table-footer').waitFor()
 }
 async function selectCourse(title) {
+  await batch().getByText('Refreshing course eligibility…', { exact: true }).waitFor({ state: 'hidden' })
   await batch().locator('.el-select__wrapper').click()
   await page.getByRole('option', { name: title, exact: true }).click()
 }

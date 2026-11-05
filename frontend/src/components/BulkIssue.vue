@@ -1,23 +1,25 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { ElMessageBox } from 'element-plus'
 import type { BulkIssueResult, Course, Identity, LearnerOutcome } from '@certificate-admin/api-contract'
 import { api } from '../api/client'
 import { batchStorageKey, checked, errorMessage, RequestError, uncertain } from '../model'
 
-const props = defineProps<{ identity: Identity; courses: Course[] }>()
-const emit = defineEmits<{ refreshed: []; unauthorized: [error: unknown] }>()
+const props = defineProps<{ identity: Identity; courses: Course[]; coursesLoading: boolean; coursesError: string }>()
+const emit = defineEmits<{ refreshed: []; refreshCourses: []; unauthorized: [error: unknown] }>()
 const courseId = ref('')
 const busy = ref(false)
 const error = ref('')
 const pending = ref('')
 const result = ref<BulkIssueResult | null>(null)
+const conflict = ref(false)
 let disposed = false
 onBeforeUnmount(() => { disposed = true })
 const rows = computed(() => result.value?.results.map(item => ({ ...item, description: reason(item) })) ?? [])
 const course = computed(() => props.courses.find(item => item.id === courseId.value))
 const storageError = ref('')
 watch(courseId, () => {
-  result.value = null; error.value = ''; storageError.value = ''
+  result.value = null; error.value = ''; storageError.value = ''; conflict.value = false
   try { pending.value = sessionStorage.getItem(batchStorageKey(props.identity, courseId.value)) ?? '' }
   catch { storageError.value = 'Session storage is unavailable. Enable it before issuing certificates.' }
 })
@@ -27,8 +29,8 @@ function reason(item: LearnerOutcome) {
     certificate_revoked: 'Existing certificate was revoked', invalid_enrollment: 'Invalid enrollment — review learner data' }[item.reason]
 }
 async function issue() {
-  if (busy.value || !course.value || (!pending.value && !course.value.is_finished) || storageError.value) return
-  busy.value = true; error.value = ''; result.value = null
+  if (busy.value || props.coursesLoading || props.coursesError || !course.value || (!pending.value && !course.value.is_finished) || storageError.value) return
+  busy.value = true; error.value = ''; result.value = null; conflict.value = false
   const storageKey = batchStorageKey(props.identity, courseId.value)
   try {
     if (!pending.value) {
@@ -65,19 +67,34 @@ async function issue() {
     if (disposed) return
     if (uncertain(failure)) error.value = `Result not yet confirmed. ${errorMessage(failure)} Retry this batch with the original key.`
     else error.value = errorMessage(failure)
+    conflict.value = failure instanceof RequestError && failure.code === 'idempotency_conflict'
     emit('unauthorized', failure)
   } finally { busy.value = false }
 }
-function newBatch() { result.value = null; error.value = '' }
+async function newBatch() {
+  if (busy.value) return
+  if (conflict.value) {
+    try {
+      await ElMessageBox.confirm('This key was rejected because it belongs to another request. Discard it and start a new batch?', 'Start a new batch', { confirmButtonText: 'Start new batch', cancelButtonText: 'Keep original key', type: 'warning' })
+    } catch { return }
+    if (disposed) return
+    try { sessionStorage.removeItem(batchStorageKey(props.identity, courseId.value)) }
+    catch { storageError.value = 'The retry key could not be cleared. Enable session storage before starting a new batch.'; return }
+  }
+  pending.value = ''; conflict.value = false; result.value = null; error.value = ''
+}
 defineExpose({ busy })
 </script>
 
 <template>
   <p class="muted">Issue certificates to completed learners in a finished course. Existing certificates are skipped, including revoked certificates.</p>
   <label class="field-label" for="issue-course">Course</label>
-  <el-select id="issue-course" v-model="courseId" placeholder="Select a course" :disabled="busy || !!result" style="width: 100%">
+  <el-select id="issue-course" v-model="courseId" placeholder="Select a course" :disabled="busy || !!result || coursesLoading || !!coursesError" style="width: 100%">
     <el-option v-for="item in courses" :key="item.id" :value="item.id" :label="item.title" />
   </el-select>
+  <p v-if="coursesLoading" role="status">Refreshing course eligibility…</p>
+  <el-alert v-if="coursesError" :title="`Courses could not be loaded: ${coursesError}`" type="error" :closable="false" />
+  <el-button :disabled="busy || coursesLoading" @click="emit('refreshCourses')">{{ coursesError ? 'Retry courses' : 'Refresh courses' }}</el-button>
   <div v-if="course" class="course-summary">
     <span><strong>{{ course.enrollment_count }}</strong> enrolled</span><span><strong>{{ course.completed_count }}</strong> completed</span>
     <span><strong>{{ course.eligible_count }}</strong> eligible</span><span><strong>{{ course.already_issued_count }}</strong> already issued</span>
@@ -97,5 +114,5 @@ defineExpose({ busy })
     <p class="muted">Retrying a completed batch does not reprocess failed learners. Start a new batch after correcting their data.</p>
     <el-button @click="newBatch">Start a new batch</el-button>
   </template>
-  <div v-else class="dialog-actions"><el-button type="primary" :loading="busy" :disabled="!course || (!course.is_finished && !pending) || !!storageError" @click="issue">{{ busy ? 'Processing…' : pending ? 'Retry original batch' : 'Issue certificates' }}</el-button></div>
+  <div v-else class="dialog-actions"><el-button v-if="conflict" @click="newBatch">Start a new batch</el-button><el-button type="primary" :loading="busy" :disabled="coursesLoading || !!coursesError || !course || (!course.is_finished && !pending) || !!storageError" @click="issue">{{ busy ? 'Processing…' : pending ? 'Retry original batch' : 'Issue certificates' }}</el-button></div>
 </template>

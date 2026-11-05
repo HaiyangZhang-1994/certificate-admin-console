@@ -78,3 +78,13 @@ Backend 未完成时 501 是预期。共享样例用于显式 mock；复用已�
 - 实际验证全部使用显式 Mock，尚未与真实 Backend 联调；不宣称验证了后端租户授权、事务/并发、幂等持久化或真实 CSV 流式/安全转义。后端交付后需关闭 Mock，重新执行真实业务链路。
 - 已知限制：Element Plus 全量导入保留，Build 有非阻断大 chunk 提示；CSV 为浏览器直接下载，页面只提示请求下载，不确认流式下载最终成功；sessionStorage 不可用时禁止新发证请求。契约类型辅助丢失 null-only 字段的问题在前端经运行时检查处理，未修改生成文件或使用类型断言。
 - 未修改 Section 8 独立回答；未创建 worktree、启动其他 agent、合并或推送代码。
+
+### Code Review 修复 · 2026-11-04
+
+- 仅修改 Frontend 实现、测试、前端说明及本 Ticket；后端、冻结契约、生成产物和根配置保持不变。未调用外部 LLM，未创建 worktree、启动其他 agent 或合并分支。
+- 跨标签页登录/退出通过 BroadcastChannel 和 storage event 发送随机事件 ID，其他标签清空私有页面与弹窗，并使旧列表/详情/会话恢复请求失效。待确认幂等 key 仍保存在原标签的 sessionStorage，供原身份恢复。两种通知机制至少需有一种可用。
+- 409/idempotency_conflict 增加“Start a new batch”确认；取消保留 key，确认后清除被拒绝的 key，下次提交前保存新 UUID。网络不确定与 503 保持原 key 重试，不提供冲突恢复捷径。
+- 打开发证弹窗时从后端刷新课程资格；加载中或失败时禁用提交，弹窗提供刷新/重试，可更新跨越课程结束时间后的资格。
+- 新增 `node frontend/tests/review-regressions.mjs`，复用真实联调的 PLAYWRIGHT_MODULE、PLAYWRIGHT_EXECUTABLE、FRONTEND_URL 和可选 SCREENSHOT_DIR。测试使用独立临时库，真实身份与幂等冲突；课程陈旧/失败通过拦截响应验证 UI，不作为后端时间计算证明。原有浏览器测试同步等待新增的资格加载状态。
+- 实际通过：`npm run typecheck`、`npm run contract:check`、`npm run test:frontend`（5 项）、`npm run build`、`node frontend/tests/review-regressions.mjs`、`npm run test:integration --workspace @certificate-admin/frontend`、`npm run test:e2e --workspace @certificate-admin/frontend`、`git diff --check`。新增回归覆盖两种跨标签通知分别失效时的另一种机制、延迟列表及历史 me 响应、弹窗清理和待确认 key 保留、真实冲突取消/确认、网络/503 原 key 重试、资格加载/失败/恢复。无相关运行错误、Vue warning 或 Vite overlay。
+- 验证环境：Windows、已有 Playwright/Chromium；真实 Vite 5191 → FastAPI 8091，独立 `tmp/review-fixes.db`；显式 mock Vite 5192。浏览器回归含桌面及 390×844 窄屏；查看了仓库外的身份清理、冲突恢复和资格刷新截图。保留既有 Element Plus 大 chunk 提示；未新增依赖，未重跑未改动的后端测试，未验证 Firefox/Safari 或生产部署。

@@ -25,6 +25,7 @@ async function login(username = 'sydney.admin') {
 }
 async function scenario(value) { await page.locator('#scenario').selectOption(value) }
 async function selectCourse(title) {
+  await page.getByRole('dialog', { name: 'Issue certificates' }).getByText('Refreshing course eligibility…', { exact: true }).waitFor({ state: 'hidden' })
   await page.getByRole('dialog', { name: 'Issue certificates' }).locator('.el-select__wrapper').click()
   await page.getByRole('option', { name: title, exact: true }).click()
 }

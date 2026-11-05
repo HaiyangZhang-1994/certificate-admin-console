@@ -6,7 +6,7 @@ import { useConsole } from './useConsole'
 import { api } from './api/client'
 import { checked, exportUrl, formatDate } from './model'
 
-const { identity, restoring, authBusy, authError, courses, courseError, page, loading, listError, search, query,
+const { identity, restoring, authBusy, authError, courses, courseError, coursesLoading, page, loading, listError, search, query,
   detailOpen, detail, detailLoading, detailError, bulkOpen, sessionVersion, filtered,
   handle, login, logout, loadCourses, loadList, loadDetail } = useConsole()
 const credentials = reactive({ username: '', password: '' })
@@ -105,6 +105,6 @@ function setScenario() { document.cookie = `dev_scenario=${scenario.value}; Path
       <div v-else-if="detailError" role="alert"><el-alert :title="detailError" type="error" :closable="false" /><el-button @click="loadDetail()">Retry details</el-button></div>
       <template v-else-if="detail"><el-tag :type="detail.status === 'valid' ? 'success' : 'danger'">{{ detail.status === 'valid' ? 'Valid' : 'Revoked' }}</el-tag><h2>{{ detail.learner.name }}</h2><p class="muted">{{ detail.learner.email }}</p><dl class="details"><dt>Course</dt><dd>{{ detail.course.title }}</dd><dt>Certificate number</dt><dd class="serial">{{ detail.serial_number }}</dd><dt>Issued at · {{ identity.tenant.timezone }}</dt><dd>{{ date(detail.issued_at) }}</dd><dt>Issued by</dt><dd>{{ detail.issued_by.name }}</dd><template v-if="detail.revoked_at"><dt>Revoked at · {{ identity.tenant.timezone }}</dt><dd>{{ date(detail.revoked_at) }}</dd><dt>Revoked by</dt><dd>{{ detail.revoked_by?.name }}</dd></template></dl><el-alert v-if="revokeError" :title="revokeError" type="error" :closable="false" /><el-button v-if="detail.status === 'valid'" type="danger" plain :loading="revokeBusy" @click="revoke">Revoke certificate</el-button><el-alert v-else title="This certificate has been revoked and will not be reissued by bulk issuance." type="info" :closable="false" /></template>
     </el-drawer>
-    <el-dialog v-model="bulkOpen" title="Issue certificates" width="min(760px, calc(100% - 24px))" :before-close="closeBulk" :close-on-click-modal="false" destroy-on-close><BulkIssue v-if="bulkOpen" ref="bulk" :key="identity.admin.id" :identity="identity" :courses="courses" @refreshed="loadList(); loadCourses()" @unauthorized="handle" /></el-dialog>
+    <el-dialog v-model="bulkOpen" title="Issue certificates" width="min(760px, calc(100% - 24px))" :before-close="closeBulk" :close-on-click-modal="false" destroy-on-close><BulkIssue v-if="bulkOpen" ref="bulk" :key="identity.admin.id" :identity="identity" :courses="courses" :courses-loading="coursesLoading" :courses-error="courseError" @refresh-courses="loadCourses" @refreshed="loadList(); loadCourses()" @unauthorized="handle" /></el-dialog>
   </template>
 </template>

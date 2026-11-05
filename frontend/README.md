@@ -52,10 +52,21 @@ The browser suite explicitly resets only development mock memory using `POST /__
 ## Behavior and integration notes
 
 - Issuance is synchronous, with an indeterminate indicator. Counts and results come from the completed response; partial failures are never called full success.
-- Pending UUIDs are saved before submission in sessionStorage, scoped by administrator, tenant and course. Unknown outcomes and errors retain the original key. Selecting that course again, including after a reload, exposes the original-key retry. Completed batches clear the key; only the explicit “Start a new batch” action begins another operation from the results view. Session storage must be enabled.
+- Pending UUIDs are saved before submission in sessionStorage, scoped by administrator, tenant and course. Unknown outcomes and errors retain the original key. Selecting that course again, including after a reload, exposes the original-key retry. Completed batches clear the key; starting another operation is explicit, and discarding a rejected conflict key requires confirmation. Session storage must be enabled.
 - Authentication/session changes clear private UI state and invalidate previous requests. Pending keys remain isolated so the original administrator can recover a result later.
+- Login/logout notify other tabs through BroadcastChannel and a storage-event fallback, clearing their private state and invalidating outstanding requests (including session restoration). Notifications contain only a random event ID. Cross-tab notification requires at least one of these browser facilities to be available.
+- An idempotency conflict offers “Start a new batch” with confirmation. Cancelling preserves the original key; confirming discards only that rejected key. Network errors and 503 never offer this shortcut and retain the original-key retry.
+- Opening the issuance dialog reloads course eligibility from the backend. Submission is disabled while eligibility loads or fails; “Refresh courses” also updates eligibility without reopening, and a failed refresh offers a retry.
 - The installed openapi-fetch helper omits null-only properties in its inferred response type. Issued/failed variants are checked for their required nulls at runtime and reconstructed as shared DTOs without assertions or new wire interfaces.
 - Dates use the authenticated tenant IANA timezone via Intl. CSV is a same-origin browser download with filters/sort and no page parameters. The frontend reports only that the download was requested; browser/server errors during a download must be checked in the browser downloads panel.
 - Mock testing does not verify real backend authentication, authorization, transactions, concurrency, CSV escaping/streaming or database correctness. These require backend integration.
 - Element Plus retains the scaffold's full registration/CSS import. The production build passes with a nonblocking large-chunk warning; tree-shaken registration is a future optimization.
 - Section 8 independent reflection/design answers are untouched.
+
+Review-fix regressions use the same Playwright/Chromium and FRONTEND_URL variables as the real integration test. Start the real services against a disposable seeded database, then run from the repository root:
+
+```powershell
+node frontend/tests/review-regressions.mjs
+```
+
+This suite uses real authentication and idempotency conflicts, tests both cross-tab notification mechanisms independently, delays old list/session responses, and verifies cancellation/new-key recovery plus original-key preservation for network/503 errors. Course-response interception exercises stale eligibility and refresh failures; those cases verify UI behavior rather than backend time calculations. It does not reset the database, but can issue eligible certificates in the demo Workplace Safety course. Optional SCREENSHOT_DIR saves evidence outside the repository.
